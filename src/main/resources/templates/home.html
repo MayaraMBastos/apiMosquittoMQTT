@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+   
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <!--    <script src="mqtt.js"></script>-->
+    <title>Title</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="divMensagem">
+        <form action="/sendMessage" method="post">
+          <input
+            type="text"
+            id="comando"
+            name="comando"
+            placeholder="Mensagem"
+          />
+          <input
+            type="text"
+            id="coderele"
+            name="coderele"
+            placeholder="Tópico"
+          />
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
+      <div class="divConsumos">
+        <h2>Consumo em tempo Real</h2>
+        <div id="messages"></div>
+        <div th:each="message : ${messages}">
+            <p th:text="${message}"></p>
+        </div>
+        <h2>Consumo diario</h2>
+        <p id="consumoDiario">aguardando...</p>
+      </div>
+    </div>
+
+    <script>
+      // Transforma a mensagem em um objeto JSON antes de enviá-la
+      var form = document.querySelector("form");
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        var message = {
+          coderele: form.querySelector('input[name="coderele"]').value,
+          comando: {
+            data: form.querySelector('input[name="comando"]').value,
+          },
+        };
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/sendMessage");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify(message));
+      });
+
+
+      var socket = new SockJS('/websocket');
+        var stompClient = Stomp.over(socket);
+
+        stompClient.debug = function (str) {
+            console.log(str);
+        };
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
+            stompClient.subscribe('/topic/messages', function (message) {
+                //showMessage(JSON.parse(message.body));
+                showMessage(message.body);
+            });
+        });
+
+        function showMessage(message) {
+            $('#messages').append('<p>' + message + '</p>');
+        }
+
+    </script>
+  </body>
+</html>
