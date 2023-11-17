@@ -34,53 +34,63 @@
         <h2>Consumo em tempo Real</h2>
         <div id="messages"></div>
         <div th:each="message : ${messages}">
-            <p th:text="${message}"></p>
+            <p th:text="${messages.message}"></p>
         </div>
         <h2>Consumo diario</h2>
-        <p id="consumoDiario">aguardando...</p>
+        <p id="mensagemRecebida"></p>
       </div>
     </div>
+<script src = "sensor.js"></script>
+<!--    <script>-->
+<!--      // Transforma a mensagem em um objeto JSON antes de enviá-la-->
+<!--      var form = document.querySelector("form");-->
+<!--      form.addEventListener("submit", function (event) {-->
+<!--        event.preventDefault();-->
 
-    <script>
-      // Transforma a mensagem em um objeto JSON antes de enviá-la
-      var form = document.querySelector("form");
-      form.addEventListener("submit", function (event) {
-        event.preventDefault();
+<!--        var message = {-->
+<!--          coderele: form.querySelector('input[name="coderele"]').value,-->
+<!--          comando: {-->
+<!--            data: form.querySelector('input[name="comando"]').value,-->
+<!--          },-->
+<!--        };-->
 
-        var message = {
-          coderele: form.querySelector('input[name="coderele"]').value,
-          comando: {
-            data: form.querySelector('input[name="comando"]').value,
-          },
-        };
-
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/sendMessage");
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.send(JSON.stringify(message));
-      });
+<!--        var xhr = new XMLHttpRequest();-->
+<!--        xhr.open("POST", "/sendMessage");-->
+<!--        xhr.setRequestHeader("Content-Type", "application/json");-->
+<!--        xhr.send(JSON.stringify(message));-->
+<!--      });-->
 
 
-      var socket = new SockJS('/websocket');
-        var stompClient = Stomp.over(socket);
+<!--      var socket = new SockJS('/websocket');-->
+<!--        var stompClient = Stomp.over(socket);-->
 
-        stompClient.debug = function (str) {
-            console.log(str);
-        };
+<!--        stompClient.debug = function (str) {-->
+<!--            console.log(str);-->
+<!--        };-->
 
-        stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
+<!--        stompClient.connect({}, function (frame) {-->
+<!--            console.log('Connected: ' + frame);-->
 
-            stompClient.subscribe('/topic/messages', function (message) {
-                //showMessage(JSON.parse(message.body));
-                showMessage(message.body);
-            });
-        });
+<!--            stompClient.subscribe('/topic/messages', function (message) {-->
+<!--                //showMessage(JSON.parse(message.body));-->
+<!--                showMessage(message.body);-->
+<!--            });-->
+<!--        });-->
 
-        function showMessage(message) {
-            $('#messages').append('<p>' + message + '</p>');
-        }
+<!--        function showMessage(message) {-->
+<!--            $('#messages').append('<p>' + message + '</p>');-->
+<!--        }-->
 
-    </script>
+<!--        var socket = new SockJS('/ws');-->
+<!--        var stompClient = Stomp.over(socket);-->
+
+<!--        stompClient.connect({}, function(frame) {-->
+<!--            stompClient.subscribe('/topic/sensor-updates', function(data) {-->
+<!--                var sensorData = JSON.parse(data.body);-->
+<!--                $("#sensorValue").text("Sensor Value: " + sensorData.value);-->
+<!--            });-->
+<!--        });-->
+
+<!--    </script>-->
   </body>
 </html>

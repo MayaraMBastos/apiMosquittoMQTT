@@ -3,13 +3,16 @@ package vega.apiMosquittoMQTT.Controller;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +22,8 @@ public class MqttControllerSocket {
 
     private MqttClient mqttClient;
     private List<String> receivedMessages = new ArrayList<>(); // Armazenar as mensagens recebidas
+
+    //private String receivedMessages;
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -33,11 +38,11 @@ public class MqttControllerSocket {
             options.setUserName("admin");
             options.setPassword("12345678".toCharArray());
 
-            mqttClient = new MqttClient(broker, clientId);
+            mqttClient = new MqttClient(broker, clientId, null);// adicionei persistencia null ou new MemoryPersistence()
             mqttClient.connect(options);
 
             // Subscrever ao tópico MQTT
-            mqttClient.subscribe("myTopic", (topic, message) -> {
+            mqttClient.subscribe("consumo", (topic, message) -> {
                 mensagemRecebida(new String(message.getPayload()));
             });
         } catch (MqttException e) {
@@ -45,22 +50,33 @@ public class MqttControllerSocket {
         }
     }
 
+//    @GetMapping("/messages")
+//    public String getMessages(Model model) {
+//        model.addAttribute("messages", receivedMessages);
+//        return "home";
+//    }
+
     @GetMapping("/messages")
-    public String getMessages(Model model) {
-        // Aqui, você pode recuperar as mensagens armazenadas ou processadas e adicioná-las ao modelo
-        // Neste exemplo, estamos utilizando a lista receivedMessages
-        model.addAttribute("messages", receivedMessages);
-        return "home"; // Isso pressupõe que você tem um arquivo HTML chamado home.html na pasta src/main/resources/templates
+    public ResponseEntity<?> getMessages() {
+        if (!receivedMessages.isEmpty()) {
+            String latestMessage = receivedMessages.get(receivedMessages.size() - 1);
+            return ResponseEntity.ok(latestMessage);
+        } else {
+            return ResponseEntity.ok("Aguarde.");
+        }
     }
+
 
     // Método chamado quando uma mensagem é recebida
     private void mensagemRecebida(String message) {
         System.out.println("Received message: " + message);
 
         // Armazenar a mensagem na lista
-        receivedMessages.add(message);
+       receivedMessages.add(message);
+        //receivedMessages = message;
 
         // Enviar a mensagem para o cliente via WebSocket
         messagingTemplate.convertAndSend("/topic/messages", message);
     }
+
 }
